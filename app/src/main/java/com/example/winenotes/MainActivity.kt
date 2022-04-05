@@ -1,11 +1,14 @@
 package com.example.winenotes
 
+import android.app.Activity
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.*
 import android.widget.LinearLayout
 import android.widget.TextView
+import androidx.activity.result.ActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -61,7 +64,38 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        return super.onOptionsItemSelected(item)
+        when (item.getItemId()) {
+            R.id.menu_item_add -> {
+                addNewNote()
+                return true
+            }
+            R.id.title_sort_menu_item -> {
+                return true
+            }
+            R.id.modified_sort_menu_item -> {
+                return true
+            }
+            else -> return super.onOptionsItemSelected(item)
+        }
+    }
+
+    private val startForAddResult =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+        result:ActivityResult ->
+
+        if (result.resultCode == Activity.RESULT_OK) {
+
+        }
+
+    }
+
+    private fun addNewNote() {
+        val intent = Intent(applicationContext, NoteActivity::class.java)
+        intent.putExtra(
+            getString(R.string.intent_purpose_key),
+            getString(R.string.intent_purpose_add_note)
+        )
+        startForAddResult.launch(intent)
     }
 
 

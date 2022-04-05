@@ -2,6 +2,7 @@ package com.example.winenotes
 
 import android.content.Intent
 import android.os.Bundle
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.example.winenotes.databinding.ActivityNoteBinding
 
@@ -21,6 +22,16 @@ class NoteActivity : AppCompatActivity() {
     }
 
     override fun onBackPressed() {
+        val title = binding.titleEditText.text.toString().trim()
+        if (title.isBlank()) {
+            Toast.makeText(applicationContext, "Title cannot be empty", Toast.LENGTH_LONG).show()
+            return
+        }
+
+        var content = binding.contentsEditText.text.toString().trim()
+        if (content.isNotBlank()) { return }
+        else { content = "" }
+
         super.onBackPressed()
     }
 }

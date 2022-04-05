@@ -2,9 +2,15 @@ package com.example.winenotes
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import com.example.winenotes.database.AppDatabase
+import com.example.winenotes.database.Note
 import com.example.winenotes.databinding.ActivityNoteBinding
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 class NoteActivity : AppCompatActivity() {
     private lateinit var binding: ActivityNoteBinding
@@ -29,8 +35,21 @@ class NoteActivity : AppCompatActivity() {
         }
 
         var content = binding.contentsEditText.text.toString().trim()
-        if (content.isNotBlank()) { return }
-        else { content = "" }
+        if (content.isNullOrBlank()) { content = "" }
+
+        CoroutineScope(Dispatchers.IO).launch {
+            val noteDao = AppDatabase.getDatabase(applicationContext).noteDao()
+            var resultId : Long
+
+            when {
+                purpose.equals(getString(R.string.intent_purpose_add_note)) -> {
+                    val note = Note(0, title, content, "today")
+                    resultId = noteDao.addNote(note)
+                    Log.i("STATUS_NAME", "inserted new note: $note")
+                }
+                else -> { TODO("Not implemented") }
+            }
+        }
 
         super.onBackPressed()
     }

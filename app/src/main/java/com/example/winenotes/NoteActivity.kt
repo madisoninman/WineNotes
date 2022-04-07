@@ -24,9 +24,29 @@ class NoteActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         val intent = getIntent()
-        purpose = intent.getStringExtra(getString(R.string.intent_purpose_key))
+        purpose = intent.getStringExtra(
+            getString(R.string.intent_purpose_key)
+        )
 
-        setTitle("$purpose Note")
+        if (purpose.equals(getString(R.string.intent_purpose_update_note))) {
+            noteId = intent.getLongExtra(
+                getString(R.string.intent_key_note_id),
+                -1
+            )
+
+            CoroutineScope(Dispatchers.IO).launch {
+                val note = AppDatabase.getDatabase(applicationContext)
+                    .noteDao()
+                    .getNote(noteId)
+
+                withContext(Dispatchers.Main) {
+                    binding.titleEditText.setText(note.title)
+                    binding.contentsEditText.setText(note.notes)
+                }
+            }
+        }
+
+        setTitle("${purpose} Name")
     }
 
     override fun onBackPressed() {
@@ -39,32 +59,6 @@ class NoteActivity : AppCompatActivity() {
         var content = binding.contentsEditText.text.toString().trim()
         if (content.isNullOrBlank()) { content = "" }
 
-//        CoroutineScope(Dispatchers.IO).launch {
-//            val noteDao = AppDatabase.getDatabase(applicationContext).noteDao()
-//            var noteId : Long
-//
-//            when {
-//                purpose.equals(getString(R.string.intent_purpose_add_note)) -> {
-//                    val note = Note(0, title, content, "today")
-//                    noteId = noteDao.addNote(note)
-//                    Log.i("STATUS_NAME", "inserted new note: $note")
-//                }
-//                else -> { TODO("Not implemented") }
-//            }
-//
-//            val intent = Intent()
-//
-//            intent.putExtra(
-//                getString(R.string.intent_key_note_id),
-//                noteId
-//            )
-//
-//            withContext(Dispatchers.Main) {
-//                setResult(RESULT_OK, intent)
-//                super.onBackPressed()
-//            }
-//        }
-
         CoroutineScope(Dispatchers.IO).launch {
             val noteDao = AppDatabase.getDatabase(applicationContext)
                 .noteDao()
@@ -75,9 +69,9 @@ class NoteActivity : AppCompatActivity() {
                 Log.i("STATUS_NAME", "inserted new note: note")
             } else {
                 // update a current person in the database
-//                val note = Note(noteId, title, content, "today")
-//                noteDao.updateNote(note)
-//                Log.i("STATUS_NAME", "updated existing note: $note")
+                val note = Note(noteId, title, content, "today")
+                noteDao.updateNote(note)
+                Log.i("STATUS_NAME", "updated existing note: $note")
             }
 
             Log.i("STATUS_NAME", "result_id: $noteId")

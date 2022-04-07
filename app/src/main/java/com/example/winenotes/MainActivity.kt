@@ -42,14 +42,20 @@ class MainActivity : AppCompatActivity() {
         adapter = MyAdapter()
         binding.mainRecyclerview.adapter = adapter
 
-        loadAllNotes()
+        loadAllNotes("")
     }
 
-    private fun loadAllNotes() {
+    private fun loadAllNotes(sort: String) {
         CoroutineScope(Dispatchers.IO).launch {
             val db = AppDatabase.getDatabase(applicationContext)
             val dao = db.noteDao()
-            val results = dao.getAllNotes()
+
+            val results = when (sort) {
+                "title" -> { dao.getAllNotesByTitle() }
+                "modified" -> { dao.getAllNotesByLastModified() }
+                else -> { dao.getAllNotes() }
+            }
+
             for (note in results) {
                 Log.i("STATUS_MAIN:", "read $note")
             }
@@ -75,9 +81,11 @@ class MainActivity : AppCompatActivity() {
                 return true
             }
             R.id.title_sort_menu_item -> {
+                loadAllNotes("title")
                 return true
             }
             R.id.modified_sort_menu_item -> {
+                loadAllNotes("modified")
                 return true
             }
             else -> return super.onOptionsItemSelected(item)
@@ -86,12 +94,12 @@ class MainActivity : AppCompatActivity() {
 
     private val startForAddResult =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result: ActivityResult ->
-            if (result.resultCode == Activity.RESULT_OK) { loadAllNotes() }
+            if (result.resultCode == Activity.RESULT_OK) { loadAllNotes("") }
         }
 
     private val startForUpdateResult =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result : ActivityResult ->
-            if (result.resultCode == Activity.RESULT_OK) { loadAllNotes() }
+            if (result.resultCode == Activity.RESULT_OK) { loadAllNotes("") }
         }
 
     private fun addNewNote() {
@@ -136,7 +144,7 @@ class MainActivity : AppCompatActivity() {
 
             val builder = AlertDialog.Builder(view!!.context)
                 .setTitle("Confirm delete")
-                .setMessage("Are you sure you want to delete " + "${note.title}?")
+                .setMessage("Are you sure you want to delete \"" + "${note.title}\"?")
                 .setNegativeButton(android.R.string.cancel, null)
                 .setPositiveButton(android.R.string.ok) {
                         dialogInterface, whichButton ->
@@ -145,7 +153,7 @@ class MainActivity : AppCompatActivity() {
                         AppDatabase.getDatabase(applicationContext)
                             .noteDao()
                             .deleteNote(note)
-                        loadAllNotes()
+                        loadAllNotes("")
                     }
                 }
             builder.show()

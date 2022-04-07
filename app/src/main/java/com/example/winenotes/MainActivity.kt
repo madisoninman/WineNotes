@@ -4,12 +4,14 @@ import android.app.Activity
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import android.view.*
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -32,13 +34,13 @@ class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         val layoutManager = LinearLayoutManager(this)
-        binding.mainRecyclerview.setLayoutManager(layoutManager)
+        binding.mainRecyclerview.layoutManager = layoutManager
 
-        val dividerItemDecoration = DividerItemDecoration(applicationContext, layoutManager.getOrientation())
+        val dividerItemDecoration = DividerItemDecoration(applicationContext, layoutManager.orientation)
         binding.mainRecyclerview.addItemDecoration(dividerItemDecoration)
 
         adapter = MyAdapter()
-        binding.mainRecyclerview.setAdapter(adapter)
+        binding.mainRecyclerview.adapter = adapter
 
         loadAllNotes()
     }
@@ -48,6 +50,9 @@ class MainActivity : AppCompatActivity() {
             val db = AppDatabase.getDatabase(applicationContext)
             val dao = db.noteDao()
             val results = dao.getAllNotes()
+            for (note in results) {
+                Log.i("STATUS_MAIN:", "read $note")
+            }
 
             withContext(Dispatchers.Main) {
                 notes.clear()
@@ -64,7 +69,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        when (item.getItemId()) {
+        when (item.itemId) {
             R.id.menu_item_add -> {
                 addNewNote()
                 return true
@@ -80,14 +85,14 @@ class MainActivity : AppCompatActivity() {
     }
 
     private val startForAddResult =
-        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
-        result:ActivityResult ->
-
-        if (result.resultCode == Activity.RESULT_OK) {
-
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result: ActivityResult ->
+            if (result.resultCode == Activity.RESULT_OK) { loadAllNotes() }
         }
 
-    }
+    private val startForUpdateResult =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result : ActivityResult ->
+            if (result.resultCode == Activity.RESULT_OK) { loadAllNotes() }
+        }
 
     private fun addNewNote() {
         val intent = Intent(applicationContext, NoteActivity::class.java)
@@ -109,10 +114,41 @@ class MainActivity : AppCompatActivity() {
         }
 
         override fun onClick(view: View?) {
+            val intent = Intent(applicationContext, NoteActivity::class.java)
+
+            intent.putExtra(
+                getString(R.string.intent_purpose_key),
+                getString(R.string.intent_purpose_update_note)
+            )
+
+            val note = notes[adapterPosition]
+            intent.putExtra(
+                getString(R.string.intent_key_note_id),
+                note.id
+            )
+
+            startForUpdateResult.launch(intent)
 
         }
 
         override fun onLongClick(view: View?): Boolean {
+            val note = notes[adapterPosition]
+
+            val builder = AlertDialog.Builder(view!!.context)
+                .setTitle("Confirm delete")
+                .setMessage("Are you sure you want to delete " + "${note.title}?")
+                .setNegativeButton(android.R.string.cancel, null)
+                .setPositiveButton(android.R.string.ok) {
+                        dialogInterface, whichButton ->
+
+                    CoroutineScope(Dispatchers.IO).launch {
+                        AppDatabase.getDatabase(applicationContext)
+                            .noteDao()
+                            .deleteNote(note)
+                        loadAllNotes()
+                    }
+                }
+            builder.show()
             return true
         }
     }
@@ -127,7 +163,8 @@ class MainActivity : AppCompatActivity() {
         }
 
         override fun onBindViewHolder(holder: MyViewHolder, position: Int) {
-            holder.view.text = notes[position].toString()
+            val note = notes[position]
+            holder.view.setText("${note.title} - ${note.lastModified}")
         }
 
         override fun getItemCount(): Int {

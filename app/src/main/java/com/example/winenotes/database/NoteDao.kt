@@ -20,7 +20,7 @@ interface NoteDao {
     @Query("SELECT * FROM note ORDER BY title")
     fun getAllNotesByTitle(): List<Note>
 
-    @Query("SELECT * FROM note ORDER BY last_modified")
+    @Query("SELECT * FROM note ORDER BY last_modified DESC")
     fun getAllNotesByLastModified(): List<Note>
 
     @Query("SELECT * FROM note WHERE id = :noteId")

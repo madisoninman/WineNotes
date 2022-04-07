@@ -12,6 +12,8 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.text.SimpleDateFormat
+import java.util.*
 
 class NoteActivity : AppCompatActivity() {
     private lateinit var binding: ActivityNoteBinding
@@ -59,17 +61,19 @@ class NoteActivity : AppCompatActivity() {
         var content = binding.contentsEditText.text.toString().trim()
         if (content.isNullOrBlank()) { content = "" }
 
+        val modified = getDate()
+
         CoroutineScope(Dispatchers.IO).launch {
             val noteDao = AppDatabase.getDatabase(applicationContext)
                 .noteDao()
 
             if (purpose.equals(getString(R.string.intent_purpose_add_note))) {
-                val note = Note(0, title, content, "today")
+                val note = Note(0, title, content, modified)
                 noteId = noteDao.addNote(note)
                 Log.i("STATUS_NAME", "inserted new note: note")
             } else {
                 // update a current person in the database
-                val note = Note(noteId, title, content, "today")
+                val note = Note(noteId, title, content, modified)
                 noteDao.updateNote(note)
                 Log.i("STATUS_NAME", "updated existing note: $note")
             }
@@ -88,5 +92,16 @@ class NoteActivity : AppCompatActivity() {
                 super.onBackPressed()
             }
         }
+    }
+
+    private fun getDate(): String {
+        // get the current date and time as a timestamp
+        val now : Date = Date()
+        // Set up a date formatter to support ISO 8601 format and UTC time zone
+        val databaseDateFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
+        databaseDateFormat.setTimeZone(TimeZone.getTimeZone("UTC"))
+        // Convert timestamp to ISO 8601 format
+        var dateString : String = databaseDateFormat.format(now)
+        return dateString
     }
 }

@@ -6,12 +6,10 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import android.view.*
-import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
-import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -22,6 +20,8 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.text.SimpleDateFormat
+import java.util.*
 
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
@@ -172,11 +172,28 @@ class MainActivity : AppCompatActivity() {
 
         override fun onBindViewHolder(holder: MyViewHolder, position: Int) {
             val note = notes[position]
-            holder.view.setText("${note.title} - ${note.lastModified}")
+            val date = getDate(note)
+            holder.view.setText("${note.title} - $date")
         }
 
         override fun getItemCount(): Int {
             return notes.size
         }
+    }
+
+    fun getDate(note: Note): String {
+        // create a parser to convert the date string from the database
+        // to a java.util.Date object
+        val parser = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
+        parser.setTimeZone(TimeZone.getTimeZone("UTC"))
+        // convert the date string from the database to the Date object
+        val dateInDatabase: Date = parser.parse(note.lastModified)
+        // create a formatter that will convert the date to the format
+        // you want the user to see on screen. This will use the
+        // time zone the user is currently in.
+        val displayFormat = SimpleDateFormat("hh:mm a  MM/dd/yyyy ")
+        // convert the temporary Date object from the database
+        // to a string for the user to see
+        return displayFormat.format(dateInDatabase)
     }
 }

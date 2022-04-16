@@ -4,13 +4,13 @@
 
     <item
         android:id="@+id/menu_item_add"
-        android:title="Add note"
+        android:title="@string/item_add_note"
         android:icon="@drawable/plus"
         app:showAsAction="ifRoom"/>
     <item
         android:id="@+id/title_sort_menu_item"
-        android:title="Sort by Title" />
+        android:title="@string/item_sort_title" />
     <item
         android:id="@+id/modified_sort_menu_item"
-        android:title="Sort by Last Modified" />
+        android:title="@string/item_sort_modified" />
 </menu>

@@ -48,13 +48,13 @@ class NoteActivity : AppCompatActivity() {
             }
         }
 
-        setTitle("${purpose} Name")
+        setTitle("${purpose} Note")
     }
 
     override fun onBackPressed() {
         val title = binding.titleEditText.text.toString().trim()
         if (title.isBlank()) {
-            Toast.makeText(applicationContext, "Title cannot be empty", Toast.LENGTH_LONG).show()
+            Toast.makeText(applicationContext, getString(R.string.blank_title_msg), Toast.LENGTH_LONG).show()
             return
         }
 
@@ -70,18 +70,12 @@ class NoteActivity : AppCompatActivity() {
             if (purpose.equals(getString(R.string.intent_purpose_add_note))) {
                 val note = Note(0, title, content, modified)
                 noteId = noteDao.addNote(note)
-                Log.i("STATUS_NAME", "inserted new note: note")
             } else {
-                // update a current person in the database
                 val note = Note(noteId, title, content, modified)
                 noteDao.updateNote(note)
-                Log.i("STATUS_NAME", "updated existing note: $note")
             }
 
-            Log.i("STATUS_NAME", "result_id: $noteId")
-
             val intent = Intent()
-
             intent.putExtra(
                 getString(R.string.intent_key_note_id),
                 noteId

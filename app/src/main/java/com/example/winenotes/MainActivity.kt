@@ -51,13 +51,9 @@ class MainActivity : AppCompatActivity() {
             val dao = db.noteDao()
 
             val results = when (sort) {
-                "title" -> { dao.getAllNotesByTitle() }
-                "modified" -> { dao.getAllNotesByLastModified() }
+                getString(R.string.sort_title) -> { dao.getAllNotesByTitle() }
+                getString(R.string.sort_modified) -> { dao.getAllNotesByLastModified() }
                 else -> { dao.getAllNotes() }
-            }
-
-            for (note in results) {
-                Log.i("STATUS_MAIN:", "read $note")
             }
 
             withContext(Dispatchers.Main) {
@@ -81,11 +77,11 @@ class MainActivity : AppCompatActivity() {
                 return true
             }
             R.id.title_sort_menu_item -> {
-                loadAllNotes("title")
+                loadAllNotes(getString(R.string.sort_title))
                 return true
             }
             R.id.modified_sort_menu_item -> {
-                loadAllNotes("modified")
+                loadAllNotes(getString(R.string.sort_modified))
                 return true
             }
             else -> return super.onOptionsItemSelected(item)
@@ -142,8 +138,9 @@ class MainActivity : AppCompatActivity() {
             val note = notes[adapterPosition]
 
             val builder = AlertDialog.Builder(view!!.context)
-                .setTitle("Confirm delete")
-                .setMessage("Are you sure you want to delete \"" + "${note.title}\"?")
+                .setTitle(getString(R.string.delete_dialog_title))
+
+                .setMessage(getString(R.string.delete_dialog_msg) + "${note.title}\"?")
                 .setNegativeButton(android.R.string.cancel, null)
                 .setPositiveButton(android.R.string.ok) {
                         dialogInterface, whichButton ->

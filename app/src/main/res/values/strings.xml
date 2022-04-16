@@ -1,11 +1,19 @@
 <resources>
     <string name="app_name">Wine Notes</string>
-
-    <!-- Intent keys -->
     <string name="intent_purpose_key">purpose</string>
     <string name="intent_purpose_add_note">Add</string>
     <string name="intent_purpose_update_note">Update</string>
     <string name="intent_purpose_delete_note">Delete</string>
     <string name="intent_key_position">position</string>
     <string name="intent_key_note_id">note id</string>
+    <string name="sort_title">title</string>
+    <string name="sort_modified">modified</string>
+    <string name="delete_dialog_title">Confirm delete</string>
+    <string name="delete_dialog_msg">Are you sure you want to delete "</string>
+    <string name="blank_title_msg">Title cannot be empty</string>
+    <string name="title_note">Title</string>
+    <string name="contents_note">Contents</string>
+    <string name="item_add_note">Add note</string>
+    <string name="item_sort_title">Sort by Title</string>
+    <string name="item_sort_modified">Sort by Last Modified</string>
 </resources>
